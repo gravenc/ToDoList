@@ -19,6 +19,7 @@ public class AppController implements MessageHandler {
   private final Messenger messenger;
   private final MainView mainView;
   private final AppModel appModel;
+  
 
   /**
    * Controller constructor The Controller is responsible for creating the MainView
@@ -74,10 +75,24 @@ public class AppController implements MessageHandler {
       "Deposit paycheck",
     };
     
+  Date[] initialDueDates = {
+    new Date(115,10,14), //1447574400000),  //Nov 15, 2015 compiler won't take number; says it's too big
+    new Date(115,5,1),   //1433142000000),  //June 1, 2015
+    new Date(115,5,15),  //1434351600000),  //June 15, 2015
+    new Date(115,7,1),   //1438412400000),  //Aug 1, 2015
+    new Date(115,9,1),   //1443682800000),  //Oct 1, 2015
+    new Date(115,8,1)    //1441090800000)   //Sep 1, 2015
+  };
+  
+
+  
+    
     // Loop through initialData and create items to add to the appModel
+    int i = 0;
     for (String description : initialData) {
-      ToDoItem item = new ToDoItem(-1, description,false,null);
+      ToDoItem item = new ToDoItem(-1, description, false, initialDueDates[i]);
       appModel.putItem (item);
+      i++;
     }
   }
 

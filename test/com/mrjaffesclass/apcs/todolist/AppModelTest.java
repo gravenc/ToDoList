@@ -2,6 +2,8 @@ package com.mrjaffesclass.apcs.todolist;
 
 import com.mrjaffesclass.apcs.messenger.*;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -26,6 +28,15 @@ public class AppModelTest {
     "Get gas in the car",
     "Deposit paycheck"
   };
+  
+  public Date[] initialDueDates = {
+    new Date(2015,4,15),
+    new Date(2015,6,1),
+    new Date(2015,5,15),
+    new Date(2015,7,1),
+    new Date(2015,8,1)
+  };
+  
   public ArrayList<ToDoItem> testArrayList;
   
   public AppModelTest() {
@@ -48,7 +59,7 @@ public class AppModelTest {
     
     this.testArrayList = new ArrayList<>();
     for (int i=0; i<initialData.length; i++) {
-      testArrayList.add(new ToDoItem(-1, initialData[i], null));
+      testArrayList.add(new ToDoItem(-1, initialData[i],false,initialDueDates[i]));
     }
   }
   
@@ -95,7 +106,7 @@ public class AppModelTest {
    */
   @Test
   public void testPutItem1() {
-    ToDoItem newItem = new ToDoItem(-1, "This is added item 1", null);
+    ToDoItem newItem = new ToDoItem(-1, "This is added item 1");
     ToDoItem addedItem = model.putItem(newItem);
     assertEquals("testPutItem1: Item returned", addedItem, newItem);
     assertEquals("testPutItem1: Item description", "This is added item 1", newItem.getDescription());
@@ -107,8 +118,8 @@ public class AppModelTest {
   @Test
   public void testPutItem2() {
     ToDoItem item;
-    ToDoItem newItem = model.putItem(new ToDoItem(-1, "This is item 1", null));
-    newItem = model.putItem(new ToDoItem(-1, "This is item 2", null));
+    ToDoItem newItem = model.putItem(new ToDoItem(-1, "This is item 1"));
+    newItem = model.putItem(new ToDoItem(-1, "This is item 2"));
     assertEquals("testPutItem2: Item count = 2", 7, model.getItems().size());
   }
   
@@ -156,8 +167,10 @@ public class AppModelTest {
   * @return AppModel returned
   */
   public AppModel addSampleItems(AppModel model) {
+    int i=0;
     for (String description : initialData) {
-      model.putItem (new ToDoItem(-1, description, null));
+      model.putItem (new ToDoItem(-1, description, false, initialDueDates[i]));
+      i++;
     }
     return model;
   }

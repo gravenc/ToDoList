@@ -2,50 +2,63 @@ package com.mrjaffesclass.apcs.todolist;
 
 import java.util.Date;
 
+
 /**
  * To do item
  * 
  * @author Roger Jaffe
  * @version 1.0
  */
-public class ToDoItem {
+public class ToDoItem implements Comparable<ToDoItem> {
 
   /**
    * id:          ID number of to do item. Assigned when added to list
    * description: Description of to do item
    * done:        True if to do item is complete
-   * date:        Date of item
    */
+  public static int compareMethod = 1;
   private int id;               
   private String description;
   private boolean done;
-  private String date;
+  private Date itemdate;
+  
   
   /**
-   * Constructor including date and completed parameter
+   * Constructor with done set to false in constructor
    * @param _id           ID number of to do item
    * @param _description  Description of to do item
-   * @param _done         Done flag
-   * @param _date         Date of item
    */
-  public ToDoItem(int _id, String _description, boolean _done, String _date) {
-    description = _description;
-    id = _id;
-    done = _done;     
-    date = _date;
-  } 
-  
-  /**
-   * Constructor including date, not done default
-   * @param _id ID number of to do item
-   * @param _description Description of to do item
-   * @param _date Date of item
-   */
-  public ToDoItem(int _id, String _description, String _date) {
+  public ToDoItem(int _id, String _description) {
     description = _description;
     id = _id;
     done = false;     // Default to not completed
-    date = _date;     
+    itemdate = new Date();
+  }
+
+  /**
+   * Constructor
+   * @param _id           ID number of to do item
+   * @param _description  Description of to do item
+   * @param _done         Done flag
+   */
+  public ToDoItem(int _id, String _description, boolean _done) {
+    description = _description;
+    id = _id;
+    done = _done;     // Default to not completed
+    itemdate = new Date();
+  }
+
+    /**
+   * Constructor
+   * @param _id           ID number of to do item
+   * @param _description  Description of to do item
+   * @param _done         Done flag
+   */
+  public ToDoItem(int _id, String _description, boolean _done, Date _date) {
+    description = _description;
+    id = _id;
+    done = _done;     // Default to not completed
+    itemdate = _date;
   }
 
   /**
@@ -56,6 +69,15 @@ public class ToDoItem {
     return description;
   }
 
+  
+  public Date getDate() {
+      return itemdate;
+  }
+  
+  public void setDate(Date iDate) {
+      this.itemdate = iDate;
+  }
+  
   /**
    * Set the to do item description
    * @param description The value to be set
@@ -104,29 +126,38 @@ public class ToDoItem {
   }
   
   /**
-   * Get the to do item date
-   * @return Date of the to do item
-   */
-  public String getDate() {
-    return date;
-  }
-  
-  /**
-   * Sets the date of the to do item. Can only be called from inside this class
-   * @param _date Date to be set
-   */
-  public void setDate(String _date) {
-    this.date = _date;
-  }
-  
-  /**
-   * Transfer the description, date, and done flag of another to do item into this one
+   * Transfer the description and done flag of another to do item into this one
    * @param anotherItem Item whose data values we are copying
    */
   public void merge(ToDoItem anotherItem) {
     this.setDescription(anotherItem.getDescription());
-    this.setDone(anotherItem.isDone()); 
-    this.setDate(anotherItem.getDate());
+    this.setDone(anotherItem.isDone());    
   }
+
+    /**
+     * See if the current date is larger than a chosen ToDoItem object's date
+     * @param compareToDoItem Item to compare to
+     * @return the time in milliseconds until the task
+     */
+    public int compareTo(ToDoItem compareToDoItem) {
+        int retVal = 0;   // need to return an int but getTime is a long
+        long thisOne = this.getDate().getTime();
+        long otherOne = compareToDoItem.getDate().getTime();
+        /* For Ascending order*/
+        
+        if ((thisOne - otherOne) > 0) {
+            retVal = 1;
+        }
+        else if ((thisOne - otherOne) < 0) {
+            retVal = -1;
+        }
+        else {
+            retVal = 0;
+        }
+                    
+        return compareMethod * retVal;
+        
+    }
+
 
 }

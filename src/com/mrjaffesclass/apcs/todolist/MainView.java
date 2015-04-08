@@ -1,13 +1,18 @@
 package com.mrjaffesclass.apcs.todolist;
 
-import com.mrjaffesclass.apcs.messenger.*;
 import java.util.*;
-import static java.util.Collections.list;
 import javax.swing.table.*;
+import com.mrjaffesclass.apcs.messenger.*;
+import java.awt.Component;
+
+import java.text.SimpleDateFormat;
+import javax.swing.JTable;
+import org.jdesktop.swingx.table.DatePickerCellEditor;
+
 /**
  * To do list main view
- * @author Spencer Adams
- * @version 2.0
+ * @author Roger Jaffe
+ * @version 1.0
  * 
  */
 public class MainView extends javax.swing.JFrame implements MessageHandler {
@@ -19,10 +24,11 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
   private final int DATE_FIELD = 3;
   
   private final int DONE_COLUMN = 0;
+  private final int DATE_COLUMN = 2;
   
   private final int DONE_FIELD_WIDTH = 65;
-  private final int DATE_FIELD_WIDTH = 65;
   private final int DESCRIPTION_FIELD_WIDTH = 475;
+  private final int DATE_FIELD_WIDTH = 475;
   private final int ROW_HEIGHT = 25;
   
   private final int X_POSITION = 100;
@@ -44,7 +50,7 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
     // Remove the ID column and set the row height
     jTable1.getColumnModel().getColumn(DONE_FIELD).setPreferredWidth(DONE_FIELD_WIDTH);  // Set width of checkbox column
     jTable1.getColumnModel().getColumn(DESCRIPTION_FIELD).setPreferredWidth(DESCRIPTION_FIELD_WIDTH);  // Set width of checkbox column
-    jTable1.getColumnModel().getColumn(DATE_FIELD).setPreferredWidth(DATE_FIELD_WIDTH);
+    jTable1.getColumnModel().getColumn(DATE_FIELD).setPreferredWidth(DATE_FIELD_WIDTH);  // Set width of date column
     jTable1.removeColumn(jTable1.getColumnModel().getColumn(ID_FIELD));  // Remove the ID column from the table
     jTable1.setRowHeight(ROW_HEIGHT);
   }
@@ -56,6 +62,27 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
   public void init() {
     messenger.subscribe("ready", this);
     messenger.subscribe("items", this);
+    
+    //Date renderer code copied from internet
+    TableCellRenderer tableCellRenderer = new DefaultTableCellRenderer() {
+
+        SimpleDateFormat f = new SimpleDateFormat("EEE MM/dd");   
+
+        public Component getTableCellRendererComponent(JTable table,
+                Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
+            if( value instanceof Date) {
+                value = f.format(value);
+            }
+            return super.getTableCellRendererComponent(table, value, isSelected,
+                    hasFocus, row, column);
+        }
+    };
+    // set our jTable date column to use date renderer above to display dates
+    jTable1.getColumnModel().getColumn(DATE_COLUMN).setCellRenderer(tableCellRenderer);    
+    
+    TableColumn dateColumn = jTable1.getColumnModel().getColumn(DATE_COLUMN);
+    dateColumn.setCellEditor(new DatePickerCellEditor());
   }
   
   // This method implements the messageHandler method defined in
@@ -104,7 +131,8 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
       tableModel.setValueAt(item.getDate(), i, DATE_FIELD);
     }
 }
-  
+
+    
   /**
    * Light up the edit item dialog
    * @param item Item to edit
@@ -122,7 +150,6 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
    */
   private void toggleDone(ToDoItem item) {
     messenger.notify("saveItem", item, true);
-    System.out.println("toggleDone");
   }
   
   /**
@@ -137,8 +164,7 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
       (int)tableModel.getValueAt(row, ID_FIELD),
       (String)tableModel.getValueAt(row, DESCRIPTION_FIELD),
       (boolean)tableModel.getValueAt(row, DONE_FIELD),
-      (String)tableModel.getValueAt(row, DATE_FIELD)
-       
+      (Date)tableModel.getValueAt(row, DATE_FIELD)
     );
     return item;
   }
@@ -152,16 +178,13 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         newItemBtn = new javax.swing.JButton();
         aboutBtn = new javax.swing.JButton();
         removeCompleteItemsBtn = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
-
-        jButton1.setText("jButton1");
+        jButtonSortUp = new javax.swing.JButton();
+        jButtonSortDown = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -170,22 +193,15 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
 
             },
             new String [] {
-                "id", "Complete", "Description", "Date"
+                "id", "Complete", "Description", "Date Due"
             }
         ) {
             Class[] types = new Class [] {
                 java.lang.Integer.class, java.lang.Boolean.class, java.lang.String.class, java.lang.Object.class
             };
-            boolean[] canEdit = new boolean [] {
-                true, true, true, false
-            };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
             }
         });
         jTable1.getTableHeader().setResizingAllowed(false);
@@ -218,17 +234,17 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
             }
         });
 
-        jButton5.setText("^ Sort");
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton5ActionPerformed(evt);
+        jButtonSortUp.setText("Sort ^");
+        jButtonSortUp.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButtonSortUpMouseClicked(evt);
             }
         });
 
-        jButton6.setText("v Sort");
-        jButton6.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton6ActionPerformed(evt);
+        jButtonSortDown.setText("Sort v");
+        jButtonSortDown.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButtonSortDownMouseClicked(evt);
             }
         });
 
@@ -237,19 +253,16 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(newItemBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(38, 38, 38)
-                        .addComponent(removeCompleteItemsBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)
-                        .addComponent(aboutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 494, Short.MAX_VALUE))
-                .addContainerGap())
+                .addComponent(newItemBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(38, 38, 38)
+                .addComponent(removeCompleteItemsBtn)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButtonSortUp)
+                .addGap(15, 15, 15)
+                .addComponent(jButtonSortDown)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(aboutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(jScrollPane2)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -259,10 +272,11 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
                     .addComponent(newItemBtn)
                     .addComponent(aboutBtn)
                     .addComponent(removeCompleteItemsBtn)
-                    .addComponent(jButton5)
-                    .addComponent(jButton6))
+                    .addComponent(jButtonSortUp)
+                    .addComponent(jButtonSortDown))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 343, Short.MAX_VALUE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 439, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -281,13 +295,17 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
     // dialog so the item can be edited.
     if (col == DONE_COLUMN) {
       toggleDone(item);
-    } else {
+    } else if (col == DATE_COLUMN) {
+      //editDate(item); 
+      // Set the cell editor in the init method so here we just need to make sure the editItem is not called so that the date editor is called
+    } 
+    else {
       editItem(item);
     }
   }//GEN-LAST:event_jTable1MouseClicked
 
   private void newItemBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newItemBtnActionPerformed
-    ToDoItem item = new ToDoItem(-1, "New to do item", null);
+    ToDoItem item = new ToDoItem(-1, "New to do item", false);
     editItem(item);
   }//GEN-LAST:event_newItemBtnActionPerformed
 
@@ -300,15 +318,15 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
     dialog.setVisible(true);
   }//GEN-LAST:event_aboutBtnActionPerformed
 
-    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        messenger.notify("sortClosest");
-        System.out.print("sortHighest");
-    }//GEN-LAST:event_jButton5ActionPerformed
+    private void jButtonSortUpMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonSortUpMouseClicked
+        // TODO add your handling code here:
+        messenger.notify("sortToDoUp");
+    }//GEN-LAST:event_jButtonSortUpMouseClicked
 
-    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        messenger.notify("sortLowest");
-        System.out.print("sortLowest");
-    }//GEN-LAST:event_jButton6ActionPerformed
+    private void jButtonSortDownMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonSortDownMouseClicked
+        // TODO add your handling code here:
+        messenger.notify("sortToDoDown");
+    }//GEN-LAST:event_jButtonSortDownMouseClicked
 
   /**
    * @param args the command line arguments
@@ -316,9 +334,8 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton aboutBtn;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButtonSortDown;
+    private javax.swing.JButton jButtonSortUp;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
     private javax.swing.JButton newItemBtn;
